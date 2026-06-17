@@ -366,7 +366,7 @@ def train_self_play(
     # 1. 基础环境参数准备
     map_lines, walls, npc_spawns, player_spawn, h, w = load_map_txt(map_file)
     npc_count = len(npc_spawns)
-    state_dim = npc_count * 2 + 2  # 匹配你的环境状态维度
+    state_dim = npc_count * 2 + 2 
 
     # 2. 初始化或加载已有的智能体
     print("\n[Self-Play] 正在初始化智能体架构...")
@@ -375,7 +375,7 @@ def train_self_play(
 
     # 聚合记录总指标
     sp_metrics = {
-        "iteration_bounds": [],  # 记录每次迭代切换的边界，方便后续画图
+        "iteration_bounds": [],  # 记录每次迭代切换的边界
         "steps": [],
         "success": [],
         "final_hp": [],
@@ -394,19 +394,16 @@ def train_self_play(
         # Phase A: 冻结 DQN 玩家策略，解冻并单独训练 NPC
         # ----------------------------------------------------
         print(f"\n>>> [Phase A] 训练 NPC (当前大轮次: {iter_idx}) | DQN玩家策略已锁定")
-        # 你的 PlayerDQNAgent 本身通过控制不进行 replay() 来实现冻结，或者设置训练时的探索率
-        # 为了强制其在作为对手时不探索不更新，我们在环境循环中动态控制
+       
 
-        # 借用现有的环境交互逻辑
         _, metrics_a, player_agent = train_agents(
             map_file=map_file,
             algorithm=algorithm,
             render=render,
             player_mode="adv",  # 使用学习型 DQN 玩家作为对手
-            freeze_npc=False,  # 解冻 NPC，使其可以更新表格
+            freeze_npc=False,  # 解冻 NPC
             npc_q_tables=npc_agents.q_tables if hasattr(npc_agents, 'q_tables') else None,
-            # 让环境内部直接复用当前的大 DQN 玩家，因此需要将 train_agents 做微调支持外部传入 player
-            # 如果现有的 train_agents 每次都内部 new 玩家，可以通过 pickle/pth 保存读取，或者直接修改传参。
+            
         )
 
         # 同步当前的 NPC 策略
@@ -432,7 +429,7 @@ def train_self_play(
             algorithm=algorithm,
             render=render,
             player_mode="adv",
-            freeze_npc=True,  # 锁定刚才变聪明了的 NPC 策略
+            freeze_npc=True,  # 锁定刚才的 NPC 策略
             npc_q_tables=npc_agents.q_tables if hasattr(npc_agents, 'q_tables') else None,
         )
 
@@ -456,7 +453,6 @@ def _append_metrics(target, source):
 
 
 def _get_q_tables_from_result(train_result, algorithm):
-    # 兼容 train_agents 返回值的防呆机制
     if isinstance(train_result, dict):
         return None
     return train_result
